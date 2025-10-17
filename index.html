@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Happy Diwali 🎆</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      background: radial-gradient(circle at bottom, #000, #111);
+      overflow: hidden;
+      color: white;
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen">
+  <canvas id="fireworks"></canvas>
+
+  <h1 class="text-5xl font-bold mb-4">🎆 Happy Diwali, <span id="name">Friend</span>! 🎇</h1>
+  <p class="text-lg mb-6">✨ May your life sparkle with joy and success ✨</p>
+
+  <p class="text-md mb-4">👀 Total visitors: <span id="count">...</span></p>
+
+  <button id="shareBtn" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg">Share This Page</button>
+
+  <script>
+    // --- Personalized Name ---
+    const params = new URLSearchParams(window.location.search);
+    const name = params.get("name") || "Friend";
+    document.getElementById("name").innerText = name;
+
+    // --- Total Visitor Counter (CountAPI) ---
+    fetch("https://api.countapi.xyz/hit/diwali-greetings-2025/visits")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("count").innerText = data.value;
+      });
+
+    // --- Share Button ---
+    document.getElementById("shareBtn").addEventListener("click", () => {
+      const link = `${window.location.origin}?name=${encodeURIComponent(name)}`;
+      navigator.clipboard.writeText(link);
+      alert("Link copied! Share it with your friends 🎉");
+    });
+
+    // --- Fireworks Animation ---
+    const canvas = document.getElementById("fireworks");
+    const ctx = canvas.getContext("2d");
+    let particles = [];
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.radius = Math.random() * 2 + 1;
+        this.dx = (Math.random() - 0.5) * 8;
+        this.dy = (Math.random() - 0.5) * 8;
+        this.life = 100;
+      }
+      update() {
+        this.x += this.dx;
+        this.y += this.dy;
+        this.dy += 0.05;
+        this.life--;
+      }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+      }
+    }
+
+    function createFirework() {
+      const x = Math.random() * canvas.width;
+      const y = Math.random() * canvas.height / 2;
+      const color = `hsl(${Math.random() * 360}, 100%, 60%)`;
+      for (let i = 0; i < 50; i++) {
+        particles.push(new Particle(x, y, color));
+      }
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      ctx.fillStyle = "rgba(0, 0, 0, 0.1)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p, i) => {
+        p.update();
+        p.draw();
+        if (p.life <= 0) particles.splice(i, 1);
+      });
+    }
+
+    setInterval(createFirework, 700);
+    animate();
+  </script>
+</body>
+</html>
